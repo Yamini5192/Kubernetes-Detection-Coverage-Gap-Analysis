@@ -1,7 +1,7 @@
 # Methodology
 
 ## Research question
-Which of the 12 selected Kubernetes/container techniques generate specific, generic, or no relevant alert from the tested default Falco configuration, and which substantiated gaps can be reduced by custom rules?
+Which of the twelve selected Kubernetes/container behaviors generate specific detections, context-only alerts, no detection, or an inconclusive result under the tested default Falco configuration? Which confirmed gaps can be addressed with custom rules?
 
 ## Experimental controls
 - Target only the `falco-lab` cluster.

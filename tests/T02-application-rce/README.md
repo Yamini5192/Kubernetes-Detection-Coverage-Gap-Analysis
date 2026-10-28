@@ -1,7 +1,7 @@
 # T02-application-rce
 
 ## Objective
-Evaluate how effectively Falco's default rules detect remote code execution (RCE) / unauthorized process execution inside a Kubernetes application container.
+Record the alerts generated when a shell command is run in an application container through `kubectl exec`. This is an RCE-like command-execution simulation; it does not exploit an application vulnerability and should not be described as a test of exploit detection.
 
 ## Preconditions
 - Target: `falco-lab` (`falco-research` namespace).
@@ -17,7 +17,7 @@ Evaluate how effectively Falco's default rules detect remote code execution (RCE
 
 ## Success criteria
 - Technique execution: Command executes inside target container and returns expected output.
-- Detection: Falco emits a specific or generic alert attributing the execution within 60 seconds.
+- Detection: Falco emits an alert that identifies the container command execution. An alert for the `kubectl exec` API request alone identifies the test mechanism, not RCE.
 
 ## Evidence
 - Evidence log (local archive): `evidence/T02/T02-application-rce-2026-10-22.txt`
@@ -25,7 +25,7 @@ Evaluate how effectively Falco's default rules detect remote code execution (RCE
 ## Outcome
 - Test status: Completed
 - Technique execution: Succeeded (command executed as `root` in target container).
-- Default alert: `Attach/Exec to pod` (Priority Notice) via K8s audit; complementary `Terminal shell in container` on interactive TTY via syscall.
+- Default alert: `Attach/Exec to pod` (Priority Notice) via Kubernetes audit. The evidence also notes that `Terminal shell in container` is available for interactive TTY use, but does not record it as an alert from this test run.
 - Alert latency: ~1.29 seconds.
-- Classification: **Specific** (Detected by default rules).
+- Classification: **Context Only**. The observed alert identifies the `kubectl exec` mechanism, not an application exploit or the command's behavior.
 - Retest: Not required (detected by default configuration).

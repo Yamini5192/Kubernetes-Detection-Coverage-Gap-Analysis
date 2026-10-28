@@ -6,9 +6,9 @@ This repository contains my Falco detection coverage assessment for a small Kube
 
 ## Current assessment status
 
-I ran all twelve scenarios and was able to classify each result: three specific detections (T02, T05, T06), four generic detections (T08, T09, T11, T12), and five cases with no relevant default alert (T01, T03, T04, T07, T10). I also retested custom rules for T01, T03, T04, and T07. Those retests covered only part of the suite, so I have not calculated a post-custom-rule coverage rate.
+I attempted all twelve scenarios. Two classifiable scenarios produced specific detections (T05 and T06); five produced only context alerts from the test mechanism or setup (T02, T08, T09, T11, T12); four had no relevant default alert (T01, T03, T04, T07); and T10's default result remains inconclusive because its original capture does not show whether the list request reached Falco. I retested custom rules for T01, T03, T04, T07, and T10. The T03 published variant fired under the Kyverno service-account identity, and the T10 metadata-only rule fired on a namespaced Secret list. These retests covered only part of the suite, so I have not calculated a post-custom-rule coverage rate.
 
-Across these runs, Falco produced a relevant alert in **7 of 12 scenarios (58.3%)**. T08's alert shows the `kubectl exec` session, not the proxy connection. T12 checked three named in-cluster services and ports; it was not a broad network scan.
+Only **2 of the 11 classifiable scenarios (18.2%)** produced a default alert that identified the behavior under test. Five other classifiable runs produced alerts for the exec harness or host-network setup. T10 also produced a Secret-create setup alert, but its default-baseline capture does not show whether the Secret-list event reached Falco. A later custom-rule retest did confirm list-event delivery. T08's alert does not identify the proxy connection. T12 checked three named in-cluster services and ports; it was not a broad network scan.
 
 ## Project contents
 

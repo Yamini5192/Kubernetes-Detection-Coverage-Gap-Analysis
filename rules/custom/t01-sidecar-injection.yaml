@@ -2,7 +2,6 @@
 # Tactic:    Execution
 # Technique: T1610 — Deploy Container (sidecar added to a workload)
 # Source:    k8saudit (Kubernetes API audit log)
-# Author:    [Redacted]
 # Date:      October 2026
 #
 # Description:

@@ -2,7 +2,6 @@
 # Tactic:    Persistence
 # Technique: Project-defined Kubernetes admission-webhook registration
 # Source:    k8saudit (Kubernetes API audit log)
-# Author:    [Redacted]
 # Date:      October 2026
 #
 # Description:

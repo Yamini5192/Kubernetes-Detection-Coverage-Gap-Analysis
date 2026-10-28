@@ -12,7 +12,7 @@ Evaluate default Falco detection of unauthorized Kubernetes static-pod creation 
 ## Procedure
 1. Verify pre-test state of `/etc/kubernetes/manifests/` on the kind control-plane node.
 2. Record UTC test start time.
-3. Write a temporary static-pod manifest `/etc/kubernetes/manifests/t04-staticpod-verify.yaml` using a local cached image (`busybox:latest`).
+3. Write a temporary static-pod manifest `/etc/kubernetes/manifests/t04-staticpod-verify.yaml` using `busybox:1.38.0`. Pull it into the kind node first if it is not cached.
 4. Monitor Falco logs for default rules and custom rule alerts within the 60-second window.
 5. Capture exact alert details: rule name, process, user, file path, event type, and latency.
 6. Remove the temporary static-pod manifest immediately.

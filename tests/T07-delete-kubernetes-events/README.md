@@ -10,7 +10,7 @@ Evaluate how effectively Falco's default rules detect the deletion of Kubernetes
 ## Procedure
 1. Record UTC test start time.
 2. Identify an existing event in the cluster.
-3. Issue a delete request for the event via `kubectl delete event <event-name>`.
+3. Delete the named Event with `kubectl delete event <event-name>`. This tests a per-object `delete`; it does not test `kubectl delete events --all` (`deletecollection`).
 4. Monitor Falco audit logs for alerts within the 60-second window.
 5. Record observed alerts, rule names, and calculate latency.
 

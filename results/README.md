@@ -4,9 +4,11 @@
 
 ## Classification values
 
-- `Specific` / `Generic` — relevant alert, distinguished by attribution precision.
+- `Specific` — alert identifies the behavior under test.
+- `Generic` — alert identifies related activity but not the behavior under test precisely.
+- `Context Only` — alert identifies the test harness or setup; it is not counted as detection.
 - `No Detection` — successful test, required telemetry available, and no relevant alert within 60 seconds.
-- `Inconclusive` — unsuccessful or insufficiently evidenced test; not counted as a miss.
+- `Inconclusive` — evidence does not establish relevant telemetry delivery or that the matching rule was loaded; not counted as a miss.
 - `Not Run` — no test outcome.
 
 Custom retest status is recorded independently. A custom alert does not rewrite the default result. Evidence paths refer to the local, Git-ignored evidence archive; the sanitized summaries available to repository readers are in [`reports/evidence-register.md`](../reports/evidence-register.md).

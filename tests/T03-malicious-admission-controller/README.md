@@ -23,7 +23,7 @@ Evaluate how effectively Falco's default rules detect the registration of an una
 - Evidence log (local archive): `evidence/T03/T03-malicious-admission-controller-2026-10-22.txt`
 - Custom-rule retest: `evidence/T03/T03-custom-rule-retest-2026-10-26.txt`
 
-The retest used the then-current rule, which excluded Kyverno service accounts. The published rule removes that broad exclusion; this expanded variant has not been redeployed/retested and should be validated before rollout.
+The 26 October retest used a rule that excluded Kyverno service accounts. On 28 October, the published version without that exclusion was loaded and tested using the Kyverno admission-controller service account. It emitted the expected alert; the temporary webhook configuration was deleted and its absence verified.
 
 ## Outcome
 - Test status: Completed
@@ -31,5 +31,6 @@ The retest used the then-current rule, which excluded Kyverno service accounts. 
 - Telemetry availability: Available (K8s API audit stream and syscall driver verified active).
 - Default alert: None observed in captured logs.
 - Classification: **No Detection** (Substantiated detection gap).
-- Custom-rule retest: **Detected**. The T03 audit rule emitted Warning alerts during successful webhook configuration creation.
+- Custom-rule retest: **Detected**. The published T03 rule emitted `T03_MALICIOUS_ADMISSION_CONTROLLER_REGISTERED` during creation under the Kyverno service-account identity.
 - Cleanup: Confirmed. Resource deleted.
+- Retest evidence: `evidence/T03/T03-published-rule-retest-2026-10-28.txt` (local archive).

@@ -7,7 +7,7 @@ Evaluate how effectively Falco's default runtime and Kubernetes API audit rules 
 - Confirm target cluster is `falco-lab` (`kind-falco-lab`).
 - Confirm Falco syscall engine (`falco`) and K8s audit receiver (`falco-audit`) are healthy.
 - Target workload: `deployment/sidecar-target` in namespace `falco-research`.
-- Use cached harmless image `busybox:latest`.
+- Use the pinned harmless image `busybox:1.38.0` (pull it into the kind node before the test if it is not cached).
 - Record test start timestamp before applying the patch.
 
 ## Procedure

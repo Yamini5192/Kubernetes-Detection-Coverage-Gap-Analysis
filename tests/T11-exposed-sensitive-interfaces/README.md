@@ -8,7 +8,7 @@ Assess whether Falco alerts when a temporary workload uses host networking to re
 
 - Use only the existing `falco-lab` kind cluster and `falco-research` namespace.
 - Confirm the audit receiver and runtime Falco pod are healthy.
-- Use the cached `curlimages/curl:latest` image, no privileged context, and a single request to `https://127.0.0.1:10250/pods`.
+- Use `quay.io/curl/curl:8.23.0` (pull it into the kind node first if it is not cached), no privileged context, and a single request to `https://127.0.0.1:10250/pods`.
 - Do not query port 10255 or publish any returned pod data. Discard the response body and record only the HTTP status.
 - Stop if host-network pod creation is disallowed or the node endpoint is not listening.
 
@@ -29,11 +29,13 @@ Assess whether Falco alerts when a temporary workload uses host networking to re
 ## Classification
 
 - Technique succeeds if the request reaches the local endpoint and returns an HTTP status (including 401/403). A connection failure makes the interface-access portion inconclusive.
-- A `Create HostNetwork Pod` alert is a generic signal for the access setup; only an alert that identifies the kubelet endpoint/request is specific to this technique.
+- A `Create HostNetwork Pod` alert is **Context Only** because it identifies the setup, not access to the kubelet endpoint. Only an alert that identifies the request is a detection of this behavior.
 - No alert can be called a miss only if the action succeeded and the relevant telemetry was available.
 
 ## Status
 
-Completed (28 October 2026). The kubelet endpoint returned HTTP 401, confirming reachability; the response body was discarded. Falco emitted `Pod started using host network` (Warning) approximately 0.23 seconds after test start. This is a generic alert for the setup, not a specific alert on the kubelet request. Cleanup was confirmed.
+Completed (28 October 2026). The kubelet endpoint returned HTTP 401, confirming reachability; the response body was discarded. Falco emitted `Pod started using host network` (Warning) approximately 0.23 seconds after test start. This is a context alert for the setup, not a detection of the kubelet request. Cleanup was confirmed.
+
+Classification: **Context Only**.
 
 Evidence: `evidence/T11/T11-exposed-sensitive-interfaces-2026-10-28.txt` (local archive).

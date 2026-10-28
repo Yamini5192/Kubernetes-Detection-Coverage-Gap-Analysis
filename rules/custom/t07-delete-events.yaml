@@ -2,7 +2,6 @@
 # Tactic:    Defense Evasion
 # Technique: Project-defined Kubernetes Event deletion (indicator removal)
 # Source:    k8saudit (Kubernetes API audit log)
-# Author:    [Redacted]
 # Date:      October 2026
 #
 # Description:
@@ -13,10 +12,9 @@
 #   (e.g., a crashing or restarting malicious pod) or to remove indicators that
 #   would otherwise alert on-call engineers.
 #
-#   kubectl delete event / kubectl delete events --all is a low-complexity,
-#   low-privilege operation that any subject with RBAC delete on the events
-#   resource can perform. It represents a meaningful gap in the default Falco
-#   k8saudit ruleset.
+#   This rule covers per-object deletion, such as `kubectl delete event <name>`.
+#   It does not match collection deletion (`kubectl delete events --all`), which
+#   uses the `deletecollection` verb and has not been tested by this project.
 #
 #   NOTE: This rule requires the k8saudit plugin and the audit webhook receiver
 #   (falco-audit, NodePort 30007) to be active. It will NOT fire on syscall-only

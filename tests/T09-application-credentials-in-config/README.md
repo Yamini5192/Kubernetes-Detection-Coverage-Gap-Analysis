@@ -18,7 +18,7 @@ Evaluate how effectively Falco's default runtime rules detect the exposure and a
      --from-literal=api_key=dummy-api-key-abc \
      -n falco-research
    ```
-3. Deploy a pod that mounts the ConfigMap as a volume file at `/etc/app/credentials.conf` and also exposes one field as an environment variable:
+3. Deploy a pod that mounts the ConfigMap directory at `/etc/app/` and also exposes one field as an environment variable. Kubernetes projects each ConfigMap key as a file, so the password key is available at `/etc/app/db_password`:
    ```yaml
    volumes:
      - name: creds-vol
@@ -26,7 +26,7 @@ Evaluate how effectively Falco's default runtime rules detect the exposure and a
          name: t09-fake-creds
    containers:
      - name: t09-creds-test
-       image: busybox:latest
+       image: busybox:1.38.0
        command: ["sleep", "3600"]
        env:
          - name: DB_PASSWORD
@@ -60,7 +60,7 @@ Evaluate how effectively Falco's default runtime rules detect the exposure and a
 - Cleanup: The test pod and ConfigMap are fully removed.
 
 ## Evidence
-- Evidence log: `evidence/T09/T09-application-credentials-in-config-<date>.txt`
+- Evidence log: `evidence/T09/T09-application-credentials-in-config-2026-10-28.txt`
   - Pre-test state: pod and ConfigMap list, Falco health check
   - Test execution: kubectl create, apply, and exec outputs
   - Detection window: Falco log extract (60 seconds from exec timestamp)
@@ -71,6 +71,6 @@ Evaluate how effectively Falco's default runtime rules detect the exposure and a
 - Technique execution: Succeeded. Fake values were read from the mounted ConfigMap file and environment variable.
 - Telemetry availability: Syscall and Kubernetes audit streams available.
 - Observed alert: `Attach/Exec to pod` (Notice) at approximately 0.34 seconds; no credential-specific syscall alert observed in the 60-second window.
-- Classification: **Generic** for the exec-session signal. This alert identifies the access path, not the credential read itself.
+- Classification: **Context Only**. The exec-session alert identifies the test mechanism, not the credential read itself.
 - Cleanup: Confirmed. Temporary pod and ConfigMap removed.
 - Evidence: `evidence/T09/T09-application-credentials-in-config-2026-10-28.txt` (local archive).

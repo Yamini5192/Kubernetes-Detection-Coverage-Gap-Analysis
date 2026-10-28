@@ -110,6 +110,21 @@ customRules:
       priority: WARNING
       source: k8s_audit
       tags: [project_detection, defense_evasion, kubernetes, indicator_removal]
+  t10-list-secrets.yaml: |-
+    - rule: Project T10 Kubernetes Secrets Listed
+      desc: >
+        Detect Kubernetes API list requests for Secret resources. The alert
+        contains request metadata only; it does not include Secret values.
+      condition: >
+        ka.verb = list
+        and ka.target.resource = secrets
+      output: >
+        T10_KUBERNETES_SECRETS_LISTED
+        (user=%ka.user.name verb=%ka.verb resource=%ka.target.resource
+        namespace=%ka.target.namespace status=%ka.response.code uri=%ka.uri)
+      priority: WARNING
+      source: k8s_audit
+      tags: [project_detection, credential_access, kubernetes, secret_list]
 
 falco:
   rules_files:
