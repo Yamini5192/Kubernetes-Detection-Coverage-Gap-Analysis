@@ -1,0 +1,68 @@
+# Lab-only egress proxy, restricted to one controlled in-cluster HTTP service.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: t08-forward-proxy-config
+  namespace: falco-research
+data:
+  nginx.conf: |
+    events {}
+    http {
+      resolver 10.96.0.10 valid=5s;
+      access_log /dev/stdout;
+      error_log /dev/stderr notice;
+      server {
+        listen 3128;
+        location / {
+          if ($http_host !~ "^health-check-service[.]default[.]svc[.]cluster[.]local(:80)?$") { return 403; }
+          proxy_pass http://$http_host$request_uri;
+          proxy_set_header Host $http_host;
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: t08-forward-proxy
+  namespace: falco-research
+  labels:
+    app: t08-forward-proxy
+spec:
+  containers:
+  - name: proxy
+    image: nginx:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: http-proxy
+      containerPort: 3128
+    volumeMounts:
+    - name: config
+      mountPath: /etc/nginx/nginx.conf
+      subPath: nginx.conf
+      readOnly: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+  volumes:
+  - name: config
+    configMap:
+      name: t08-forward-proxy-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: t08-forward-proxy
+  namespace: falco-research
+spec:
+  selector:
+    app: t08-forward-proxy
+  ports:
+  - name: http-proxy
+    port: 3128
+    targetPort: 3128
+    protocol: TCP

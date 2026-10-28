@@ -1,0 +1,128 @@
+driver:
+  enabled: false
+
+collectors:
+  enabled: false
+
+controller:
+  kind: deployment
+  deployment:
+    replicas: 1
+
+falcoctl:
+  artifact:
+    install:
+      enabled: true
+    follow:
+      enabled: true
+  config:
+    artifact:
+      install:
+        resolveDeps: true
+        refs:
+          - k8saudit-rules:0.16
+          - k8saudit:0.16
+          - json:0
+      follow:
+        refs:
+          - k8saudit-rules:0.16
+          - k8saudit:0.16
+          - json:0
+
+services:
+  # Lab-only receiver: plain HTTP and no authentication. Restrict reachability
+  # to the kind control-plane audit webhook client; do not expose publicly.
+  - name: k8saudit-webhook
+    type: NodePort
+    ports:
+      - port: 9765
+        nodePort: 30007
+        protocol: TCP
+
+customRules:
+  t01-sidecar-injection.yaml: |-
+    - rule: Project T01 Kubernetes Workload Spec Patched
+      desc: >
+        Detect PATCH or UPDATE operations targeting Kubernetes workload resources
+        (deployments, pods, daemonsets, statefulsets, replicasets). An adversary
+        may patch a running workload to inject a malicious sidecar container
+        without redeploying the application, achieving code execution within an
+        existing pod security context.
+      condition: >
+        ka.verb in (patch, update)
+        and ka.target.resource in (deployments, pods, daemonsets, statefulsets, replicasets)
+        and not ka.target.subresource in (status, scale, binding, eviction)
+        and not ka.user.name startswith "system:node:"
+        and not ka.user.name in (system:serviceaccount:kube-system:replicaset-controller,
+                                 system:serviceaccount:kube-system:deployment-controller,
+                                 system:serviceaccount:kube-system:statefulset-controller,
+                                 system:serviceaccount:kube-system:daemon-set-controller,
+                                 system:serviceaccount:kube-system:horizontal-pod-autoscaler,
+                                 system:serviceaccount:kube-system:disruption-controller,
+                                 system:serviceaccount:kube-system:endpoint-controller,
+                                 system:serviceaccount:kube-system:generic-garbage-collector,
+                                 system:kube-controller-manager,
+                                 system:kube-scheduler)
+      output: >
+        T01_SIDECAR_INJECTION_ATTEMPT
+        (user=%ka.user.name verb=%ka.verb resource=%ka.target.resource
+        namespace=%ka.target.namespace name=%ka.target.name
+        status=%ka.response.code uri=%ka.uri)
+      priority: WARNING
+      source: k8s_audit
+      tags: [project_detection, execution, kubernetes, T1610, sidecar_injection]
+  t03-admission-controller.yaml: |-
+    - rule: Project T03 Admission Webhook Configuration Created or Updated
+      desc: >
+        Detect creation or update of ValidatingWebhookConfiguration or
+        MutatingWebhookConfiguration resources. Registering a new admission
+        webhook grants the endpoint the ability to inspect and mutate all API
+        server requests matching its rules, making this a powerful persistence
+        and interception mechanism. Unexpected webhook registrations must be
+        investigated immediately.
+      condition: >
+        ka.verb in (create, update, patch)
+        and ka.target.resource in (validatingwebhookconfigurations, mutatingwebhookconfigurations)
+      output: >
+        T03_MALICIOUS_ADMISSION_CONTROLLER_REGISTERED
+        (user=%ka.user.name verb=%ka.verb resource=%ka.target.resource
+        name=%ka.target.name namespace=%ka.target.namespace
+        status=%ka.response.code uri=%ka.uri)
+      priority: WARNING
+      source: k8s_audit
+      tags: [project_detection, persistence, kubernetes, admission_controller]
+  t07-delete-events.yaml: |-
+    - rule: Project T07 Kubernetes Event Deleted
+      desc: >
+        Detect deletion of Kubernetes Event objects via the API server. Kubernetes
+        Events are a critical operational audit trail recording pod scheduling,
+        container lifecycle events, probe failures, and warnings. Deletion of
+        events may indicate an attempt to erase evidence of prior malicious
+        activity, qualifying as indicator removal / defense evasion.
+      condition: >
+        ka.verb = delete
+        and ka.target.resource = events
+      output: >
+        T07_KUBERNETES_EVENT_DELETED
+        (user=%ka.user.name verb=%ka.verb resource=%ka.target.resource
+        name=%ka.target.name namespace=%ka.target.namespace
+        status=%ka.response.code uri=%ka.uri)
+      priority: WARNING
+      source: k8s_audit
+      tags: [project_detection, defense_evasion, kubernetes, indicator_removal]
+
+falco:
+  rules_files:
+    - /etc/falco/k8s_audit_rules.yaml
+    - /etc/falco/rules.d
+  plugins:
+    - name: k8saudit
+      library_path: libk8saudit.so
+      init_config: '{"maxEventBytes": 2097152}'
+      open_params: "http://:9765/k8s-audit"
+    - name: json
+      library_path: libjson.so
+      init_config: ""
+  load_plugins:
+    - k8saudit
+    - json

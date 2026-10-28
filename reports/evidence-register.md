@@ -1,0 +1,25 @@
+# Sanitized Evidence Register
+
+This register summarizes the local raw evidence referenced by the assessment. Raw captures are excluded from Git because they contain cluster metadata and environment-specific details. The summaries below intentionally omit hostnames, internal addresses, account names, pod identifiers, and credential values.
+
+| Test | Local evidence artifact(s) | Sanitized observation |
+|---|---|---|
+| T01 baseline | `evidence/T01/T01-sidecar-injection-2026-10-22.txt` | Workload patch succeeded and the injected sidecar became ready. No relevant default alert was recorded in the 60-second window. |
+| T01 custom retest | `evidence/T01/T01-custom-rule-retest-2026-10-26.txt` | Custom workload-patch rule emitted Warning alerts during the successful patch retest; cleanup restored the original workload shape. |
+| T02 | `evidence/T02/T02-application-rce-2026-10-22.txt` | Command execution succeeded. An audit `Attach/Exec to pod` Notice alert was recorded at approximately 1.29 seconds. |
+| T03 baseline | `evidence/T03/T03-malicious-admission-controller-2026-10-22.txt` | Test webhook configuration creation succeeded. No relevant default alert was recorded; the test resource was deleted. |
+| T03 custom retest | `evidence/T03/T03-custom-rule-retest-2026-10-26.txt` | Custom webhook-configuration rule emitted Warning alerts during successful creation; cleanup deleted the test configuration. |
+| T04 original run | `evidence/T04/T04-static-pods-2026-10-22.txt` | Static pod ran and the temporary manifest was removed; file-write telemetry was not independently validated in that run. |
+| T04 validated retest | `evidence/T04/T04-default-telemetry-retest-2026-10-28-summary.txt` | Ready modern eBPF Falco observed the exact manifest `openat` through the loaded custom syscall rule. No relevant default alert appeared in the 60-second test-log window. Temporary static pod and manifest were removed; original control-plane manifest hashes were unchanged. The Falco event timestamp was offset from host UTC, so no latency is reported. T04 is classified No Detection for this tested path, with custom detection confirmed. |
+| T05 | `evidence/T05/T05-writable-hostpath-2026-10-22.txt` | Sensitive hostPath pod creation produced a `Create Sensitive Mount Pod` Warning at approximately 1.16 seconds; test pod was removed. |
+| T06 | `evidence/T06/T06-cluster-admin-binding-2026-10-22.txt` | Cluster-admin binding creation produced an `Attach to cluster-admin Role` Warning at approximately 0.57 seconds; binding was removed. |
+| T07 baseline | `evidence/T07/T07-delete-kubernetes-events-2026-10-22.txt` | Test Event deletion succeeded without a relevant default alert in the observation window. |
+| T07 custom retests | `evidence/T07/` (local archive) | The first retest did not execute because the target name was empty. A later retest successfully deleted a synthetic, namespaced Event, observed the custom Warning alert within the window, and confirmed the Event was absent afterward. |
+| T09 | `evidence/T09/T09-application-credentials-in-config-2026-10-28.txt` | Fake values were read from a mounted ConfigMap file and environment variable. The audit stream produced a generic `Attach/Exec to pod` Notice; no credential-specific syscall alert was observed. |
+| T10 | `evidence/T10/T10-list-kubernetes-secrets-2026-10-28.txt` | A namespaced Secret list succeeded and the audit receiver was active, but no relevant list alert appeared in the 60-second window. The fake Secret was deleted. |
+| T11 | `evidence/T11/T11-exposed-sensitive-interfaces-2026-10-28.txt` | A single request reached the local kubelet endpoint and returned HTTP 401; only the status was recorded. A generic host-network pod alert fired; temporary pod was removed. |
+| T12 | `evidence/T12/T12-network-mapping-retest-2026-10-28.txt` | Three bounded TCP probes to explicitly named in-cluster Services/ports succeeded. The audit stream recorded a generic exec alert about 0.19 seconds after test start; no network-probe syscall alert appeared. Temporary pod was removed. |
+| T08 initial attempt | `evidence/T08/T08-connect-from-proxy-2026-10-28.txt` | The existing internal application did not act as a forward proxy; curl timed out before reaching the destination. This attempt was inconclusive and is superseded by the successful controlled retest. |
+| T08 validated retest | `evidence/T08/T08-forward-proxy-retest-2026-10-28.txt` | One request through a temporary destination-allowlisted in-cluster proxy reached the controlled health-check Service (HTTP 200; body discarded). The audit stream recorded a generic exec alert about 0.25 seconds after test start; no proxy-specific network alert appeared in 60 seconds. All temporary resources were removed. Classification: Generic. |
+
+The result tracker at [`results/detection-coverage.csv`](../results/detection-coverage.csv) is the machine-readable source of current classifications. When raw evidence and prose disagree, retain the more conservative classification and resolve the discrepancy before changing reported rates.

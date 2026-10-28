@@ -1,0 +1,11 @@
+- rule: Project T04 Static Pod Manifest Opened For Write
+  desc: Detect a process opening a Kubernetes static pod manifest for writing.
+  condition: >
+    open_write
+    and fd.name startswith /etc/kubernetes/manifests/
+  output: >
+    T04_STATIC_POD_MANIFEST_WRITE
+    (file=%fd.name process=%proc.name command=%proc.cmdline
+    user=%user.name evt_type=%evt.type)
+  priority: WARNING
+  tags: [project_detection, persistence, kubernetes, static_pod]

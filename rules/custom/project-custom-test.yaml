@@ -1,0 +1,10 @@
+- rule: Project Custom Rule Load Test
+  desc: Verify that a project-managed custom Falco rule is loaded.
+  condition: >
+    spawned_process and container
+    and proc.name in (sh, bash)
+  output: >
+    PROJECT_CUSTOM_RULE_LOAD_TEST
+    (user=%user.name command=%proc.cmdline container=%container.id)
+  priority: NOTICE
+  tags: [project_test, process]

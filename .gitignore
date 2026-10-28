@@ -1,0 +1,39 @@
+# Local and sensitive data
+/backups/*
+!/backups/README.md
+/evidence/*
+!/evidence/README.md
+/baseline/*
+!/baseline/README.md
+
+# Credentials and keys
+*.kubeconfig
+kubeconfig
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+*.p12
+*secret*.yaml
+*secret*.yml
+*credential*.yaml
+*credential*.yml
+
+# Raw logs, dumps, and exports
+*.log
+*.dump
+*.har
+*.backup
+*.bak
+*~
+
+# Operating system / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local publication bundle
+/github-safe-release/
+/github-safe-release.zip

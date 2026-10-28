@@ -1,0 +1,52 @@
+# Custom Falco Rule — T01: Sidecar Injection
+# Tactic:    Execution
+# Technique: T1610 — Deploy Container (sidecar added to a workload)
+# Source:    k8saudit (Kubernetes API audit log)
+# Author:    [Redacted]
+# Date:      October 2026
+#
+# Description:
+#   Detects modification attempts against Deployment or Pod specs via PATCH or
+#   UPDATE API operations. Sidecar injection via the Kubernetes API appears as
+#   a patch/update to a workload resource (deployments, pods, daemonsets, etc.)
+#   that adds a new container definition. Since Falco's k8saudit plugin receives
+#   the raw audit event, this rule fires on any patch/update to core workload
+#   resources, providing a detection signal for lateral injection attempts.
+#
+#   NOTE: This rule requires the k8saudit plugin and the audit webhook receiver
+#   (falco-audit, NodePort 30007) to be active. It will NOT fire on syscall-only
+#   Falco deployments.
+#
+# References:
+#   MITRE ATT&CK: https://attack.mitre.org/techniques/T1610/
+
+- rule: Project T01 Kubernetes Workload Spec Patched
+  desc: >
+    Detect PATCH or UPDATE operations targeting Kubernetes workload resources
+    (deployments, pods, daemonsets, statefulsets, replicasets). An adversary
+    may patch a running workload to inject a malicious sidecar container without
+    redeploying the application, achieving code execution within an existing pod
+    security context.
+  condition: >
+    ka.verb in (patch, update)
+    and ka.target.resource in (deployments, pods, daemonsets, statefulsets, replicasets)
+        and not ka.target.subresource in (status, scale, binding, eviction)
+        and not ka.user.name startswith "system:node:"
+        and not ka.user.name in (system:serviceaccount:kube-system:replicaset-controller,
+                                 system:serviceaccount:kube-system:deployment-controller,
+                                 system:serviceaccount:kube-system:statefulset-controller,
+                                 system:serviceaccount:kube-system:daemon-set-controller,
+                                 system:serviceaccount:kube-system:horizontal-pod-autoscaler,
+                                 system:serviceaccount:kube-system:disruption-controller,
+                                 system:serviceaccount:kube-system:endpoint-controller,
+                                 system:serviceaccount:kube-system:generic-garbage-collector,
+                                 system:kube-controller-manager,
+                                 system:kube-scheduler)
+  output: >
+    T01_SIDECAR_INJECTION_ATTEMPT
+    (user=%ka.user.name verb=%ka.verb resource=%ka.target.resource
+    namespace=%ka.target.namespace name=%ka.target.name
+    status=%ka.response.code uri=%ka.uri)
+  priority: WARNING
+  source: k8s_audit
+  tags: [project_detection, execution, kubernetes, T1610, sidecar_injection]

@@ -1,0 +1,45 @@
+# Custom Falco Rule — T07: Delete Kubernetes Events
+# Tactic:    Defense Evasion
+# Technique: Project-defined Kubernetes Event deletion (indicator removal)
+# Source:    k8saudit (Kubernetes API audit log)
+# Author:    [Redacted]
+# Date:      October 2026
+#
+# Description:
+#   Detects deletion of Kubernetes Event objects via the API server. Kubernetes
+#   Events record significant cluster state changes (pod scheduling, image pulls,
+#   probe failures, OOMKills, etc.) and are a primary operational audit trail.
+#   An attacker may delete events to erase evidence of prior malicious activity
+#   (e.g., a crashing or restarting malicious pod) or to remove indicators that
+#   would otherwise alert on-call engineers.
+#
+#   kubectl delete event / kubectl delete events --all is a low-complexity,
+#   low-privilege operation that any subject with RBAC delete on the events
+#   resource can perform. It represents a meaningful gap in the default Falco
+#   k8saudit ruleset.
+#
+#   NOTE: This rule requires the k8saudit plugin and the audit webhook receiver
+#   (falco-audit, NodePort 30007) to be active. It will NOT fire on syscall-only
+#   Falco deployments.
+#
+# References:
+#   Kubernetes Event API objects: https://kubernetes.io/docs/reference/kubernetes-api/cluster-resources/event-v1/
+
+- rule: Project T07 Kubernetes Event Deleted
+  desc: >
+    Detect deletion of Kubernetes Event objects via the API server. Kubernetes
+    Events are a critical operational audit trail, recording pod scheduling,
+    container lifecycle events, probe failures, and warnings. Deletion of events
+    may indicate an attempt to erase evidence of prior anomalous or malicious
+    activity, qualifying as an indicator removal / defense evasion technique.
+  condition: >
+    ka.verb = delete
+    and ka.target.resource = events
+  output: >
+    T07_KUBERNETES_EVENT_DELETED
+    (user=%ka.user.name verb=%ka.verb resource=%ka.target.resource
+    name=%ka.target.name namespace=%ka.target.namespace
+    status=%ka.response.code uri=%ka.uri)
+  priority: WARNING
+  source: k8s_audit
+  tags: [project_detection, defense_evasion, kubernetes, indicator_removal]

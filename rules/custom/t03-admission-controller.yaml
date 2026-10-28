@@ -1,0 +1,47 @@
+# Custom Falco Rule — T03: Malicious Admission Controller
+# Tactic:    Persistence
+# Technique: Project-defined Kubernetes admission-webhook registration
+# Source:    k8saudit (Kubernetes API audit log)
+# Author:    [Redacted]
+# Date:      October 2026
+#
+# Description:
+#   Detects creation or update of ValidatingWebhookConfiguration or
+#   MutatingWebhookConfiguration resources via the Kubernetes API. Registering
+#   a malicious admission webhook allows an attacker to intercept and modify
+#   any API server request cluster-wide, providing persistent, privileged access
+#   to all workload definitions and secrets passed through the API.
+#
+#   This is a high-impact persistence technique. Legitimate admission webhook
+#   registrations are rare, typically performed only during initial cluster
+#   setup or when deploying specific tooling (e.g., cert-manager, OPA Gatekeeper,
+#   Kyverno). This rule does not infer authorization from identity. It may alert
+#   on legitimate controller changes; tune against representative audit traffic.
+#
+#   NOTE: This rule requires the k8saudit plugin and the audit webhook receiver
+#   (falco-audit, NodePort 30007) to be active. It will NOT fire on syscall-only
+#   Falco deployments.
+#
+# References:
+#   Kubernetes Admission Controllers:
+#     https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
+
+- rule: Project T03 Admission Webhook Configuration Created or Updated
+  desc: >
+    Detect creation or update of ValidatingWebhookConfiguration or
+    MutatingWebhookConfiguration resources. Registering a new admission webhook
+    grants the webhook endpoint the ability to inspect and mutate all API server
+    requests matching its rules, making this a powerful persistence and
+    interception mechanism. Unexpected webhook registrations should be
+    investigated immediately.
+  condition: >
+        ka.verb in (create, update, patch)
+        and ka.target.resource in (validatingwebhookconfigurations, mutatingwebhookconfigurations)
+  output: >
+    T03_MALICIOUS_ADMISSION_CONTROLLER_REGISTERED
+    (user=%ka.user.name verb=%ka.verb resource=%ka.target.resource
+    name=%ka.target.name namespace=%ka.target.namespace
+    status=%ka.response.code uri=%ka.uri)
+  priority: WARNING
+  source: k8s_audit
+  tags: [project_detection, persistence, kubernetes, admission_controller]
