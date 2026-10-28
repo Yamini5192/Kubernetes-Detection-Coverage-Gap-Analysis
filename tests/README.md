@@ -30,4 +30,4 @@ When conducting a test:
 5. Classify the outcome according to [`docs/detection-criteria.md`](../docs/detection-criteria.md).
 6. Update both the test `README.md` and the master tracker [`results/detection-coverage.csv`](../results/detection-coverage.csv).
 
-All twelve procedures now have a recorded, classifiable outcome. T08's generic exec alert did not identify proxy network activity. T12 used a single service/port probe, not a broad network scan.
+All twelve procedures have a recorded result. The generic alert in T08 showed the exec session, not the proxy connection. T12 tested three named service/port pairs; it was a small, bounded check rather than a broad network scan.

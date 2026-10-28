@@ -7,9 +7,9 @@
 
 ## Decision summary
 
-All twelve planned scenarios have recorded, classifiable outcomes. Falco's default configuration generated a relevant alert in seven and produced no relevant alert in five within the defined 60-second window. T04's validated manifest-write event was observed by the custom syscall rule, but no default rule alert appeared. T08 succeeded through a restricted in-cluster proxy; its generic audit alert identified `kubectl exec`, not the proxy connection.
+I ran all twelve scenarios and classified each one. Falco's default configuration produced a relevant alert in seven cases; in five cases, no relevant alert appeared within 60 seconds. For T04, the custom syscall rule saw the manifest write, while the default rules did not alert. T08 reached the controlled service through a restricted in-cluster proxy, but Falco's generic audit alert showed only the `kubectl exec` session.
 
-Custom-rule retests observed alerts for workload-spec patching (T01), admission webhook registration (T03), Event deletion (T07), and T04 manifest writes. The T07 first retest failed because no event name was supplied, but a later successful retest produced the expected alert. The published T03 rule removes the Kyverno exclusion used in its retest; this expanded variant still needs validation. No overall post-custom-rule coverage percentage is reported because custom retests covered only a subset of scenarios.
+I also retested custom rules for workload patching (T01), webhook registration (T03), Event deletion (T07), and manifest writes (T04). The first T07 retest did not run because I had not supplied an Event name; a later run succeeded and generated the alert. The T03 rule in this repository no longer excludes Kyverno, but I have not retested that broader version. Since the custom rules were tested against only four scenarios, I have not calculated an overall post-custom-rule rate.
 
 ## Results at a glance
 
@@ -23,7 +23,7 @@ Custom-rule retests observed alerts for workload-spec patching (T01), admission 
 | Confirmed custom-rule retests | 4 (T01, T03, T04, T07) |
 | Not run | 0 |
 
-Default relevant-alert rate among classifiable tests: **7/12 (58.3%)**. This is a lab result for the tested scenarios and configuration, not a general Falco effectiveness estimate. T08, T09, and T12 generic exec alerts identify access paths, not the proxied connection, credential reading, or network mapping. T11's generic host-network alert identifies the setup, not the kubelet request.
+Falco generated a relevant alert in **7 of 12 scenarios (58.3%)**. This describes these tests and this lab setup only. The generic alerts for T08, T09, and T12 show an exec session; they do not identify the proxy connection, credential access, or network probes. T11's alert shows that the pod used host networking, not that a kubelet request was made.
 
 ## Key findings
 
@@ -44,6 +44,6 @@ Default relevant-alert rate among classifiable tests: **7/12 (58.3%)**. This is 
 
 ## Interpretation and limitations
 
-The assessment uses a 60-second observation window and a specific/generic/no-detection/inconclusive/not-run taxonomy. T12 used three named in-cluster services/ports and was not a comprehensive scan. Supplemental kube-bench, Kubescape, and Trivy baseline captures exist locally from September 2026, but they have not been reviewed for currentness or synthesized into this Falco report. Evidence files and raw environment captures remain local and are excluded from version control. The checked-in evidence register contains sanitized summaries; readers cannot independently reproduce raw observations from the repository alone. False-positive rates, production performance, resilience under load, and coverage outside these exact scenarios were not measured.
+I used a 60-second observation window and classified results as specific, generic, no detection, inconclusive, or not run. T12 checked three named services and ports, not a comprehensive scan. I have older kube-bench, Kubescape, and Trivy captures from September 2026, but I have not checked whether they are current or included them in this Falco report. Raw captures stay local; the evidence register contains sanitized summaries, so this repository alone is not enough to reproduce every observation. I did not measure false-positive rates, production performance, behavior under load, or coverage beyond these scenarios.
 
 See the [technical report](coverage-gap-analysis.md), [evidence register](evidence-register.md), and [coverage tracker](../results/detection-coverage.csv) for details.

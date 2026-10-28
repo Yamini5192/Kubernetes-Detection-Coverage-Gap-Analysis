@@ -10,11 +10,11 @@
 
 ## 1. Executive overview
 
-This report evaluates observed Falco detections for twelve planned Kubernetes/container scenarios. Results are limited to the recorded lab configuration and evidence summarized in the [evidence register](evidence-register.md). Raw captures are kept locally and excluded from version control.
+I tested twelve Kubernetes and container scenarios against Falco. This report describes what I saw in the lab configuration listed below; the [evidence register](evidence-register.md) summarizes the supporting captures. The raw captures remain in my local archive and are not part of this repository.
 
 The default configuration produced specific alerts for T02, T05, and T06; generic alerts for T08, T09, T11, and T12; and no relevant alert for T01, T03, T04, T07, and T10 under the recorded test conditions. T04's retest independently verified the manifest-write syscall event through the custom rule while no default alert appeared. T08's restricted proxy request succeeded; its generic alert identified the `kubectl exec` access path, not the proxied network connection. Custom retests confirmed alerts for T01, T03, T04, and T07.
 
-All twelve scenarios are classifiable. The observed relevant-alert rate was 7/12 (58.3%), including four generic alerts. This figure describes only these scenarios and this lab configuration; it should not be generalized to other clusters or Falco configurations. No overall post-custom-rule coverage rate is calculated because custom retests covered only a subset of scenarios.
+All twelve scenarios have a result. Falco produced a relevant alert in seven (58.3%), including four generic alerts. That figure applies to these scenarios and this lab setup; it should not be read as a score for other clusters. I did not calculate an overall rate after adding the custom rules because I retested only four scenarios.
 
 ## 2. Scope and method
 
@@ -123,6 +123,6 @@ The namespaced Secret list succeeded using a temporary Secret with fake data. Th
 
 ## 8. Conclusion
 
-The available evidence supports three specific detections, four generic detections, and five default misses across twelve attempted scenarios. Custom retests confirm T01, T03, T04, and T07 behavior. All planned scenarios now have classifiable results, but the assessment remains a bounded lab measurement: the T08 alert identifies only the exec access path, and T12 tested only three explicitly named in-cluster services/ports.
+In these runs, Falco produced three specific detections, four generic detections, and no relevant default alert in five scenarios. Custom-rule alerts were observed for T01, T03, T04, and T07. The results are limited to this lab: T08's alert shows the exec session, and T12 covered three named in-cluster service/port pairs.
 
 See the [executive summary](executive-summary.md), [evidence register](evidence-register.md), and [CSV tracker](../results/detection-coverage.csv).

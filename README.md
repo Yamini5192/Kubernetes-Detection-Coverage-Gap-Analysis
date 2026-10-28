@@ -1,14 +1,14 @@
 # Kubernetes Detection Coverage Gap Analysis
 
-This project measures how Falco detects a defined set of Kubernetes and container security scenarios, documents verified gaps, and validates targeted custom rules. Findings follow **verify, don't assume**: test success, telemetry health, observed alerts, and classification are tracked separately.
+This repository contains my Falco detection coverage assessment for a small Kubernetes lab. It records twelve test scenarios, what Falco alerted on, and a few custom rules written to cover gaps found during testing. The results are tied to the setup described here; they are not a general score for Falco.
 
 > **Lab-only:** Several procedures create cluster-admin bindings, hostPath mounts, host-network pods, or static-pod manifests. Run them only in a disposable, isolated lab after reviewing each procedure. Do not apply the test steps to production clusters.
 
 ## Current assessment status
 
-All twelve planned scenarios have recorded, classifiable outcomes: three specific detections (T02, T05, T06), four generic detections (T08, T09, T11, T12), and five no-detection results (T01, T03, T04, T07, T10). Custom-rule retests confirmed T01, T03, T04, and T07 behavior. No overall post-custom coverage rate is claimed.
+I ran all twelve scenarios and was able to classify each result: three specific detections (T02, T05, T06), four generic detections (T08, T09, T11, T12), and five cases with no relevant default alert (T01, T03, T04, T07, T10). I also retested custom rules for T01, T03, T04, and T07. Those retests covered only part of the suite, so I have not calculated a post-custom-rule coverage rate.
 
-The current observed relevant-alert rate is **7/12 (58.3%) among classifiable scenarios**. This is a bounded result from the recorded lab configuration, not a general product effectiveness estimate. T08's generic exec alert does not identify the proxy connection; T12 tested three named in-cluster services/ports, not a comprehensive scan.
+Across these runs, Falco produced a relevant alert in **7 of 12 scenarios (58.3%)**. T08's alert shows the `kubectl exec` session, not the proxy connection. T12 checked three named in-cluster services and ports; it was not a broad network scan.
 
 ## Project contents
 
@@ -31,5 +31,4 @@ The current observed relevant-alert rate is **7/12 (58.3%) among classifiable sc
 
 ## Publication and evidence
 
-Raw evidence, backups, and baseline captures are excluded from this repository because they contain environment identifiers or sensitive security details. The checked-in evidence register contains sanitized summaries; do not copy local raw captures into the public repository.
-
+I have kept raw evidence, backups, and baseline captures out of this repository because they include environment details. The evidence register contains summaries with identifying values removed. Keep the original captures in the local archive; do not add them to the public repository.
