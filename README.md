@@ -18,7 +18,7 @@ Across these runs, Falco produced a relevant alert in **7 of 12 scenarios (58.3%
 - [`helm/`](helm/README.md) — runtime and audit receiver configuration
 - [`results/detection-coverage.csv`](results/detection-coverage.csv) — machine-readable tracker
 - [`reports/`](reports/README.md) — executive summary, technical report, sanitized evidence register
-- `evidence/`, `backups/`, and `baseline/` — local-only evidence/archive material; excluded from Git
+- `evidence/`, `backups/`, and `baseline/` — placeholder README files are tracked; raw evidence and archives are kept locally and excluded from Git
 
 ## Assessment workflow
 

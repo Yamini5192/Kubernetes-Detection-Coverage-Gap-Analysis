@@ -28,7 +28,7 @@ Falco generated a relevant alert in **7 of 12 scenarios (58.3%)**. This describe
 ## Key findings
 
 1. **Control-plane and credential discovery monitoring have verified gaps.** Default Falco produced no relevant alert for sidecar injection (T01), admission webhook registration (T03), the tested static-manifest write (T04), Kubernetes Event deletion (T07), or listing Kubernetes Secrets (T10), despite successful actions and the relevant telemetry checks described in the technical report.
-2. **High-impact activity was detected in the tested cases.** Falco emitted specific audit alerts for creation of a sensitive hostPath pod (T05) and a cluster-admin binding (T06). Generic alerts identified the exec path for T02, T08, T09, and T12, and host-network pod setup for T11.
+2. **High-impact activity was detected in the tested cases.** Falco emitted specific audit alerts for creation of a sensitive hostPath pod (T05) and a cluster-admin binding (T06). T02 also produced a specific exec alert. Generic alerts for T08, T09, and T12 showed the exec path, while T11's alert identified the host-network pod setup.
 3. **Custom rule validation is partial.** T01, T03, T04, and T07 fired during retests. The T04 custom rule observed the validated syscall, while default rules produced no relevant alert for that write.
 4. **Network-specific visibility remains a gap.** T08's proxy request and T12's three bounded TCP probes succeeded, but Falco only identified the exec paths, not the network activity. These tests do not establish coverage for broader network reconnaissance.
 
