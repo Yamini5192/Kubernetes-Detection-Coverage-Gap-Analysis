@@ -31,4 +31,5 @@ The current observed relevant-alert rate is **7/12 (58.3%) among classifiable sc
 
 ## Publication and evidence
 
-Raw evidence and backups are excluded from version control because they may contain environment identifiers or sensitive data. The checked-in evidence register contains sanitized summaries. No Git remote is configured in the current checkout; GitHub publication requires an authorized repository destination.
+Raw evidence, backups, and baseline captures are excluded from this repository because they contain environment identifiers or sensitive security details. The checked-in evidence register contains sanitized summaries; do not copy local raw captures into the public repository.
+
